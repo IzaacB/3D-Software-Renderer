@@ -49,6 +49,8 @@ typedef struct {
 
 typedef struct {
     u32 vi0, vi1, vi2, color;
+    u8 flat;
+    vector3D normal;
 } face;
 
 // ENTITY DATA TYPES

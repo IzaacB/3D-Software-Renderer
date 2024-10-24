@@ -108,7 +108,7 @@ int main(){
         //cow_rotation.x += 1 * delta;
         //cow_rotation.y += 1 * delta;
 
-        add_obj_to_scene("stanford-bunny.obj", obj_transform, obj_rotation, obj_scale, WHITE);
+        add_obj_to_scene("stanford-bunny.obj", obj_transform, obj_rotation, obj_scale, WHITE, 0);
         insert_dir_light(&state.dir_light_buffer, light);
         insert_dir_light(&state.dir_light_buffer, light1);
         insert_dir_light(&state.dir_light_buffer, light2);

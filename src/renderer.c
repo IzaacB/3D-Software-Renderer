@@ -347,9 +347,21 @@ void render_sprite3D(sprite3D sprite){
     }
 }
 
-void cull_backfaces(){
-    // Initialize cull buffers
-    face_array culled_faces; initialize_face_array(&culled_faces, 1);
+void initialize_vertices(){
+    vector3D zero = {0, 0, 0};
+    for (i32 i = 0; i < state.vertex_buffer.used; i++){
+        state.vertex_buffer.values[i].normal = zero;
+        state.vertex_buffer.values[i].light_intensity = zero;
+    }
+}
+
+void normalize_normals(){
+    for (i32 i = 0; i < state.vertex_buffer.used; i++){
+        state.vertex_buffer.values[i].normal = normalize(state.vertex_buffer.values[i].normal);
+    }
+}
+
+void assign_normals(){
 
     for (i32 i = 0; i < state.geo_buffer.used; i++){
         vector3D v0, v1, v2;
@@ -363,32 +375,46 @@ void cull_backfaces(){
 
         // Get face normal
         vector3D normal = normalize(cross_product(v01, v02));
+        state.geo_buffer.values[i].normal = normal;
 
-        // Give normal to vertices.
-        if (state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal.x == 0 && state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal.y == 0 && state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal.z == 0){
+        if (dot_product(normal, normal) != 0){
+            if (state.geo_buffer.values[i].flat == 1){
+                // Replace vertex normals
+                state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal = normal;
+                state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal = normal;
+                state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal = normal;
+
+            }else{
+                // Combine the normals.
+                state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal = add_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal, normal);
+                state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal = add_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal, normal);
+                state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal = add_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal, normal);
+            }
+        }else{
+            // Replace vertex normals
             state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal = normal;
-        }else{
-            vector3D new = divide_by_scalar(add_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal, normal), 2);
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal = new;
-        }
-
-        if (state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal.x == 0 && state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal.y == 0 && state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal.z == 0){
             state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal = normal;
-        }else{
-            vector3D new = divide_by_scalar(add_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal, normal), 2);
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal = new;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal = normal;
         }
 
-        if (state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal.x == 0 && state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal.y == 0 && state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal.z == 0){
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal = normal;
-        }else{
-            vector3D new = divide_by_scalar(add_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal, normal), 2);
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal = new;
-        }
+    }
+    normalize_normals();
+}
+
+void cull_backfaces(){
+    // Initialize cull buffers
+    face_array culled_faces; initialize_face_array(&culled_faces, 1);
+
+    for (i32 i = 0; i < state.geo_buffer.used; i++){
+        vector3D v0, v1, v2;
+        v0 = state.vertex_buffer.values[state.geo_buffer.values[i].vi0].position;
+        v1 = state.vertex_buffer.values[state.geo_buffer.values[i].vi1].position;
+        v2 = state.vertex_buffer.values[state.geo_buffer.values[i].vi2].position;
+        
+        vector3D normal = state.geo_buffer.values[i].normal;
 
         // Get face origin.
         vector3D face_origin = {(v0.x + v1.x + v2.x)/3, (v0.y + v1.y + v2.y)/3, (v0.z + v1.z + v2.z)/3};
-        //normalize(face_origin);
 
         //Get angle.
         f32 dot = dot_product(normal, face_origin);
@@ -397,9 +423,7 @@ void cull_backfaces(){
         if (angle >= 90){
             insert_face(&culled_faces, state.geo_buffer.values[i]);
         }
-
     }
-
     copy_face_array(&state.geo_buffer, &culled_faces);
 }
 
@@ -602,9 +626,6 @@ void light_scene(){
         u8 b = base_color & 0xFF;
 
         vector3D fi = {r/255, g/255, b/255};
-        vector3D ni0 = state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity;
-        vector3D ni1 = state.vertex_buffer.values[state.geo_buffer.values[i].vi1].light_intensity;
-        vector3D ni2 = state.vertex_buffer.values[state.geo_buffer.values[i].vi2].light_intensity;
 
         for (i32 j = 0; j < state.dir_light_buffer.used; j++){
             vector3D light_dir = rotate_against(state.dir_light_buffer.values[j].direction);
@@ -639,6 +660,8 @@ void light_scene(){
 
 
 void render_scene() {
+    initialize_vertices();
+    assign_normals();
     cull_backfaces();
     light_scene();
     clip_scene();
