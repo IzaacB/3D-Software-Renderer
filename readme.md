@@ -6,6 +6,8 @@ Key press:
     3, per-face shading.
     4, per-vertex shading.
     5, per-pixel shading.
+    z, enable/disable depth-buffering.
+    b, enable/disable backface culling.
 
 This codebase is the result of years of studying books of the related techniques and math for a 3D software renderer.
 All code provided by me. OBJ's imported from blender.
