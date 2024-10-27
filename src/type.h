@@ -6,8 +6,8 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CANVAS_WIDTH 1280//1280//320
-#define CANVAS_HEIGHT 720 //720//180
+#define CANVAS_WIDTH 256//1280//320
+#define CANVAS_HEIGHT 224 //720//180
 #define TARGET_FPS 60
 
 typedef float f32;
@@ -50,6 +50,7 @@ typedef struct {
 typedef struct {
     u32 vi0, vi1, vi2, color;
     vector3D normal, origin, intensity;
+    bool flat;
 } face;
 
 // ENTITY DATA TYPES

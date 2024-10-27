@@ -116,7 +116,7 @@ void add_model_to_scene(model model) { //Add model to global buffers.
     }
 }
 
-void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3D scale,  u32 color){
+void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3D scale,  u32 color, bool flat){
     u32 offset = state.vertex_buffer.used;
     vector3D zero = {0, 0, 0};
     FILE *file = fopen(path, "r");
@@ -134,7 +134,7 @@ void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3
         else if (line[0] == 'f' && line[1] == ' ') {
             u32 v0, v1, v2;
             sscanf(line + 2, "%d %d %d", &v0, &v1, &v2);
-            face face = {v0 - 1 + offset, v1 - 1 + offset, v2 - 1 + offset, color};
+            face face = {v0 - 1 + offset, v1 - 1 + offset, v2 - 1 + offset, color, flat};
             insert_face(&state.geo_buffer, face);
         }
 

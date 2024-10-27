@@ -212,9 +212,9 @@ static void light_scene_faces(){
             f32 dot = fmax(0, dot_product(direction, state.geo_buffer.values[i].normal));
             vector3D light_intensity = multiply_by_scalar(intensity, dot);
 
-            state.geo_buffer.values[i].intensity.z += face_intensity.x * light_intensity.x;
+            state.geo_buffer.values[i].intensity.x += face_intensity.x * light_intensity.z;
             state.geo_buffer.values[i].intensity.y += face_intensity.y * light_intensity.y;
-            state.geo_buffer.values[i].intensity.x += face_intensity.z * light_intensity.z;
+            state.geo_buffer.values[i].intensity.z += face_intensity.z * light_intensity.x;
         }
 
         r = fmin(state.geo_buffer.values[i].intensity.x * 255, 255);
@@ -243,23 +243,23 @@ static void light_scene_vertices(){
             f32 dot = fmax(0, dot_product(direction, state.vertex_buffer.values[state.geo_buffer.values[i].vi0].normal));
             vector3D light_intensity = multiply_by_scalar(intensity, dot);
 
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity.z += (face_intensity.x * light_intensity.x)/8;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity.x += (face_intensity.x * light_intensity.z)/8;
             state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity.y += (face_intensity.y * light_intensity.y)/8;
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity.x += (face_intensity.z * light_intensity.z)/8;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity.z += (face_intensity.z * light_intensity.x)/8;
 
             dot = fmax(0, dot_product(direction, state.vertex_buffer.values[state.geo_buffer.values[i].vi1].normal));
             light_intensity = multiply_by_scalar(intensity, dot);
 
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi1].light_intensity.z += (face_intensity.x * light_intensity.x)/8;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi1].light_intensity.x += (face_intensity.x * light_intensity.z)/8;
             state.vertex_buffer.values[state.geo_buffer.values[i].vi1].light_intensity.y += (face_intensity.y * light_intensity.y)/8;
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi1].light_intensity.x += (face_intensity.z * light_intensity.z)/8;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi1].light_intensity.z += (face_intensity.z * light_intensity.x)/8;
 
             dot = fmax(0, dot_product(direction, state.vertex_buffer.values[state.geo_buffer.values[i].vi2].normal));
             light_intensity = multiply_by_scalar(intensity, dot);
 
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].light_intensity.z += (face_intensity.x * light_intensity.x)/8;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].light_intensity.x += (face_intensity.x * light_intensity.z)/8;
             state.vertex_buffer.values[state.geo_buffer.values[i].vi2].light_intensity.y += (face_intensity.y * light_intensity.y)/8;
-            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].light_intensity.x += (face_intensity.z * light_intensity.z)/8;
+            state.vertex_buffer.values[state.geo_buffer.values[i].vi2].light_intensity.z += (face_intensity.z * light_intensity.x)/8;
         }
         //print_vector3D(state.vertex_buffer.values[state.geo_buffer.values[i].vi0].light_intensity);
     }
@@ -281,9 +281,9 @@ static u32 calculate_lighting(vector3D normal, u32 base_color){
             f32 dot = fmax(0, dot_product(direction, normal));
             vector3D light_intensity = multiply_by_scalar(intensity, dot);
 
-            new_intensity.z += (face_intensity.x * light_intensity.x);
+            new_intensity.x += (face_intensity.x * light_intensity.z);
             new_intensity.y += (face_intensity.y * light_intensity.y);
-            new_intensity.x += (face_intensity.z * light_intensity.z);
+            new_intensity.z += (face_intensity.z * light_intensity.x);
         }
 
     u32 new_color = ((u8)fmin((new_intensity.x * 255 + state.ambient_light.x * 255), 255) << 16) | ((u8)fmin((new_intensity.y * 255 + state.ambient_light.y * 255), 255) << 8) | (u8)fmin((new_intensity.z * 255 + state.ambient_light.z * 255), 255);
@@ -318,7 +318,6 @@ static void clip_against_plane(plane clipping_plane){
         i32 new_vertex_indices[4];
         i8 num_clipped_vertices = 0;
 
-        // If all vertices are inside the plane, copy them as they are
         if (v0_in && v1_in && v2_in) {
             new_vertex_indices[0] = clipped_vertices.used;
             vertex vertice0 = {v0, n0, li0};
@@ -337,21 +336,18 @@ static void clip_against_plane(plane clipping_plane){
             continue;
         }
 
-        // If all vertices are outside the plane, discard the face
         if (!v0_in && !v1_in && !v2_in) {
             continue;
         }
 
-        // Handle vertices that are inside or crossing the plane
         if (v0_in) {
             new_vertex_indices[num_clipped_vertices++] = clipped_vertices.used;
-            vertex vertice = {v0, n0, li0};  // Preserve normal and light intensity
+            vertex vertice = {v0, n0, li0};
             insert_vertice(&clipped_vertices, vertice);
         }
 
-        // Interpolate between v0 and v1 if they are on opposite sides of the plane
         if (v0_in != v1_in) {
-            float t = d0 / (d0 - d1);
+            f32 t = d0 / (d0 - d1);
             vector3D intersection = {
                 v0.x + t * (v1.x - v0.x),
                 v0.y + t * (v1.y - v0.y),
@@ -379,9 +375,8 @@ static void clip_against_plane(plane clipping_plane){
             insert_vertice(&clipped_vertices, vertice);
         }
 
-        // Interpolate between v1 and v2 if they are on opposite sides of the plane
         if (v1_in != v2_in) {
-            float t = d1 / (d1 - d2);
+            f32 t = d1 / (d1 - d2);
             vector3D intersection = {
                 v1.x + t * (v2.x - v1.x),
                 v1.y + t * (v2.y - v1.y),
@@ -409,9 +404,8 @@ static void clip_against_plane(plane clipping_plane){
             insert_vertice(&clipped_vertices, vertice);
         }
 
-        // Interpolate between v2 and v0 if they are on opposite sides of the plane
         if (v2_in != v0_in) {
-            float t = d2 / (d2 - d0);
+            f32 t = d2 / (d2 - d0);
             vector3D intersection = {
                 v2.x + t * (v0.x - v2.x),
                 v2.y + t * (v0.y - v2.y),
@@ -433,12 +427,10 @@ static void clip_against_plane(plane clipping_plane){
             insert_vertice(&clipped_vertices, vertice);
         }
 
-        // Create new face(s) from the clipped vertices
         if (num_clipped_vertices == 3) {
             face new_face = {new_vertex_indices[0], new_vertex_indices[1], new_vertex_indices[2], state.geo_buffer.values[i].color, state.geo_buffer.values[i].normal, state.geo_buffer.values[i].origin, state.geo_buffer.values[i].intensity};
             insert_face(&clipped_faces, new_face);
         } else if (num_clipped_vertices == 4) {
-            // Split quad into two triangles
             face tri1 = {new_vertex_indices[0], new_vertex_indices[1], new_vertex_indices[2], state.geo_buffer.values[i].color, state.geo_buffer.values[i].normal, state.geo_buffer.values[i].origin, state.geo_buffer.values[i].intensity};
             face tri2 = {new_vertex_indices[0], new_vertex_indices[2], new_vertex_indices[3], state.geo_buffer.values[i].color, state.geo_buffer.values[i].normal, state.geo_buffer.values[i].origin, state.geo_buffer.values[i].intensity};
             insert_face(&clipped_faces, tri1);

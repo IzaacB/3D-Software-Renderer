@@ -32,6 +32,6 @@ extern void copy_directional_light_array(directional_light_array *dest, directio
 
 extern void add_model_to_scene(model model);
 
-extern void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3D scale, u32 color);
+extern void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3D scale, u32 color, bool flat);
 
 #endif

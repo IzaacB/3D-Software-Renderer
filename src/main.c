@@ -23,16 +23,20 @@ int main(){
 
     f32 input_timer = 0;
 
-    vector3D obj_transform = {0, -1, 5};
+    vector3D obj_transform = {0, 0, 0};
     vector3D obj_rotation = {0, 0, 0};
-    vector3D obj_scale = {1, 1, 1};
+    vector3D obj_scale = {10, 10, 10};
 
-    vector3D obj2_transform = {0, 0, 15};
+    vector3D obj2_transform = {0, 0, 0};
     vector3D obj2_rotation = {0, 0, 0};
-    vector3D obj2_scale = {1, 1, 1};
+    vector3D obj2_scale = {5, 5, 5};
+
+    vector3D obj3_transform = {0, 0, 0};
+    vector3D obj3_rotation = {0, 0, 0};
+    vector3D obj3_scale = {10, 10, 10};
 
     directional_light light = {{1, 1, 0}, {1, 1, 1}};
-    directional_light light2 = {{0, -1, 0}, {0, 1, 0}};
+    directional_light light2 = {{-1, -1, 0}, {.25, .1, .25}};
 
     vector3D ambient_light = {.1, .1, .1};
     state.ambient_light = ambient_light;
@@ -150,8 +154,13 @@ int main(){
             input_timer -= 1 * delta;
         }
 
-        add_obj_to_scene("cow.obj", obj_transform, obj_rotation, obj_scale, WHITE);
-        //add_obj_to_scene("cow.obj", obj2_transform, obj2_rotation, obj2_scale, GREEN);
+        obj_rotation.x += .1 * delta; obj_rotation.y += .1 * delta; obj_rotation.z += .1 * delta;
+        obj3_rotation.x -= .1 * delta; obj3_rotation.y -= .1 * delta; obj3_rotation.z -= .1 * delta; 
+        obj2_rotation.x -= .1 * delta; obj2_rotation.y -= .1 * delta; obj2_rotation.z -= .1 * delta; 
+        //add_obj_to_scene("cube.obj", obj_transform, obj_rotation, obj_scale, WHITE, false);
+        add_obj_to_scene("torus.obj", obj_transform, obj_rotation, obj_scale, BLUE, false);
+        add_obj_to_scene("torus.obj", obj3_transform, obj3_rotation, obj3_scale, GREEN, false);
+        add_obj_to_scene("monkey.obj", obj2_transform, obj2_rotation, obj2_scale, RED, false);
         insert_directional_light(&state.directional_light_buffer, light);
         insert_directional_light(&state.directional_light_buffer, light2);
 
