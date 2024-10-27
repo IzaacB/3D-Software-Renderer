@@ -15,28 +15,27 @@ int main(){
 
     state.viewport_width = 1.65; state.viewport_distance = .5; state.viewport_height = 1;
     state.viewport_position.x = 0; state.viewport_position.y = 0; state.viewport_position.z = 0;
+    state.mode = 0;
+    state.backface_culling = true;
+    state.depth_buffering = true;
 
     //DEBUG
 
-    vector3D obj_transform = {0, -15, 0};
+    f32 input_timer = 0;
+
+    vector3D obj_transform = {0, -1, 5};
     vector3D obj_rotation = {0, 0, 0};
-    vector3D obj_scale = {100, 100, 100};
+    vector3D obj_scale = {1, 1, 1};
 
-    vector3D light_dir = {0, -1, 0};
-    vector3D light_intensity = {0, .1, .1};
-    dir_light light = {light_dir, light_intensity};
+    vector3D obj2_transform = {0, 0, 15};
+    vector3D obj2_rotation = {0, 0, 0};
+    vector3D obj2_scale = {1, 1, 1};
 
-    vector3D light_dir1 = {1, 1, 1};
-    vector3D light_intensity1 = {.1, 0, 0};
-    dir_light light1 = {light_dir1, light_intensity1};
+    directional_light light = {{1, 1, 0}, {1, 1, 1}};
+    directional_light light2 = {{0, -1, 0}, {0, 1, 0}};
 
-    vector3D light_dir2 = {0, .5, -1};
-    vector3D light_intensity2 = {0, .1, 0};
-    dir_light light2 = {light_dir2, light_intensity2};
-
-    vector3D simon_pos = {0, 0, 0};
-    f32 simon_scale = 1;
-    sprite3D doomguy = {"Doomguy.bmp", simon_pos, simon_scale};
+    vector3D ambient_light = {.1, .1, .1};
+    state.ambient_light = ambient_light;
 
     //END DEBUG
 
@@ -64,7 +63,7 @@ int main(){
         // Initialize scene buffers
         initialize_vertice_array(&state.vertex_buffer, 1);
         initialize_face_array(&state.geo_buffer, 1);
-        initialize_dir_light_array(&state.dir_light_buffer, 1);
+        initialize_directional_light_array(&state.directional_light_buffer, 1);
 
         // Get keyboard input
         const u8 *keystate = SDL_GetKeyboardState(NULL);
@@ -89,6 +88,14 @@ int main(){
             state.viewport_position.z -= 5 * sin(state.viewport_rotation.y) * delta;
         }
 
+        if (keystate[SDL_SCANCODE_LSHIFT]){
+            state.viewport_position.y += 5 * delta;
+        }
+
+        if (keystate[SDL_SCANCODE_LCTRL]){
+            state.viewport_position.y -= 5 * delta;
+        }
+
         if (keystate[SDL_SCANCODE_UP]){
             state.viewport_rotation.x += 2 * delta;
         }
@@ -105,28 +112,64 @@ int main(){
             state.viewport_rotation.y -= 2 * delta;
         }
 
-        //cow_rotation.x += 1 * delta;
-        //cow_rotation.y += 1 * delta;
+        if (keystate[SDL_SCANCODE_0]){
+            state.mode = 0;
+        }
 
-        add_obj_to_scene("stanford-bunny.obj", obj_transform, obj_rotation, obj_scale, WHITE, 0);
-        insert_dir_light(&state.dir_light_buffer, light);
-        insert_dir_light(&state.dir_light_buffer, light1);
-        insert_dir_light(&state.dir_light_buffer, light2);
+        if (keystate[SDL_SCANCODE_1]){
+            state.mode = 1;
+        }
+
+        if (keystate[SDL_SCANCODE_2]){
+            state.mode = 2;
+        }
+
+        if (keystate[SDL_SCANCODE_3]){
+            state.mode = 3;
+        }
+        
+        if (keystate[SDL_SCANCODE_4]){
+            state.mode = 4;
+        }
+
+        if (keystate[SDL_SCANCODE_5]){
+            state.mode = 5;
+        }
+
+        if (keystate[SDL_SCANCODE_B] && input_timer <= 0){
+            state.backface_culling = !state.backface_culling;
+            input_timer = .5;
+        }
+
+        if (keystate[SDL_SCANCODE_Z] && input_timer <= 0){
+            state.depth_buffering = !state.depth_buffering;
+            input_timer = .5;
+        }
+
+        if (input_timer > 0){
+            input_timer -= 1 * delta;
+        }
+
+        add_obj_to_scene("cow.obj", obj_transform, obj_rotation, obj_scale, WHITE);
+        //add_obj_to_scene("cow.obj", obj2_transform, obj2_rotation, obj2_scale, GREEN);
+        insert_directional_light(&state.directional_light_buffer, light);
+        insert_directional_light(&state.directional_light_buffer, light2);
 
         clear_screen();
+        clear_depth();
 
         // RENDER CODE HERE
 
         render_scene();
-        render_sprite3D(doomguy);
 
         // END RENDER
+        
         // Update screen and clear scene buffers
         update_screen();
 
         clear_vertice_array(&state.vertex_buffer);
         clear_face_array(&state.geo_buffer);
-        clear_depth();
+        clear_directional_light_array(&state.directional_light_buffer);
 
         // Delta time
         Uint32 frame_time = SDL_GetTicks() - current;

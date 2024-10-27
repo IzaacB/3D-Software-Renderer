@@ -69,32 +69,32 @@ void copy_face_array(face_array *dest, face_array *src){
     }
 }
 
-void initialize_dir_light_array(dir_light_array *array, u32 initial_size) { //Initialize a dynamic vertice array with some amount of values.
-    array->values = (dir_light *)malloc(initial_size * sizeof(dir_light));
+void initialize_directional_light_array(directional_light_array *array, u32 initial_size) { //Initialize a dynamic vertice array with some amount of values.
+    array->values = (directional_light *)malloc(initial_size * sizeof(directional_light));
     array->size = initial_size;
     array->used = 0;
 }
 
-void insert_dir_light(dir_light_array *array, dir_light light){
+void insert_directional_light(directional_light_array *array, directional_light light){
     if (array->used == array->size) { //Check if array is full, if so realloc.
         array->size *= 2;
-        array->values = (dir_light *)realloc(array->values, array->size * sizeof(dir_light));
+        array->values = (directional_light *)realloc(array->values, array->size * sizeof(directional_light));
     }
     array->values[array->used++] = light;//Add vertice at next available index.
 }
 
-void clear_dir_light_array(dir_light_array *array) { //Clear the contents in a vertice array, and reset values.
+void clear_directional_light_array(directional_light_array *array) { //Clear the contents in a vertice array, and reset values.
     free(array->values);
     array->values = NULL;
     array->size = 0;
     array->used = 0;
 }
 
-void copy_dir_light_array(dir_light_array *dest, dir_light_array *src){
+void copy_directional_light_array(directional_light_array *dest, directional_light_array *src){
     dest->size = src->size;
     dest->used = src->used;
 
-    dest->values = (dir_light *)malloc(dest->size * sizeof(dir_light));
+    dest->values = (directional_light *)malloc(dest->size * sizeof(directional_light));
     for (u32 i = 0; i < src->used; i++){
         dest->values[i] = src->values[i];
     }
@@ -106,7 +106,7 @@ void add_model_to_scene(model model) { //Add model to global buffers.
     for (int i = 0; i < model.len_vertices; i++){
         vector3D transformed = model.vertices[i];
         transform_vertice(&transformed, model.position, model.rotation, model.scale);
-        vertex vertice = {transformed, {0, 0, 0}, {0, 0, 0}};
+        vertex vertice = {transformed};
         insert_vertice(&state.vertex_buffer, vertice);
     }
     
@@ -116,7 +116,7 @@ void add_model_to_scene(model model) { //Add model to global buffers.
     }
 }
 
-void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3D scale,  u32 color, u8 flat){
+void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3D scale,  u32 color){
     u32 offset = state.vertex_buffer.used;
     vector3D zero = {0, 0, 0};
     FILE *file = fopen(path, "r");
@@ -127,14 +127,14 @@ void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3
             f32 x, y, z;
             sscanf(line + 2, "%f %f %f", &x, &y, &z);
             vector3D vertice = {x, y, z}; transform_vertice(&vertice, transform, rotation, scale);
-            vertex v = {vertice, {0, 0, 0}, {0, 0, 0}};
+            vertex v = {vertice};
             insert_vertice(&state.vertex_buffer, v);
         }
 
         else if (line[0] == 'f' && line[1] == ' ') {
             u32 v0, v1, v2;
             sscanf(line + 2, "%d %d %d", &v0, &v1, &v2);
-            face face = {v0 - 1 + offset, v1 - 1 + offset, v2 - 1 + offset, color, false};
+            face face = {v0 - 1 + offset, v1 - 1 + offset, v2 - 1 + offset, color};
             insert_face(&state.geo_buffer, face);
         }
 

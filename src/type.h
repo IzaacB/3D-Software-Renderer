@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CANVAS_WIDTH 1280 //1280//320
+#define CANVAS_WIDTH 1280//1280//320
 #define CANVAS_HEIGHT 720 //720//180
 #define TARGET_FPS 60
 
@@ -33,56 +33,42 @@ typedef int64_t i64;
 
 typedef struct {
     f32 x, y, z;
+
 } vector3D;
 
 typedef struct {
-    f32 x, y;
-} vector2D;
+    vector3D normal;
+    f32 d;
 
-typedef struct {
-    f32 A, B, C, D;
 } plane;
 
 typedef struct {
     vector3D position, normal, light_intensity;
+
 } vertex;
 
 typedef struct {
     u32 vi0, vi1, vi2, color;
-    u8 flat;
-    vector3D normal;
+    vector3D normal, origin, intensity;
 } face;
 
 // ENTITY DATA TYPES
 
 typedef struct {
-    vector3D *vertices;
+    vector3D *vertices, position, rotation, scale;
     face *faces;
     u32 len_vertices, len_faces;
-    vector3D position, rotation, scale;
 
 } model;
-
-typedef struct {
-    char *path;
-    vector3D position;
-    f32 scale;
-    
-} sprite3D;
 
 // LIGHT DATA TYPES
 
 typedef struct {
     vector3D direction, intensity;
 
-} dir_light;
+} directional_light;
 
-typedef struct {
-    vector3D position;
-    f32 intensity;
-} omni_light;
-
-// ENTITY ARRAYS
+// ARRAYS
 
 typedef struct {
     vertex *values;
@@ -97,24 +83,10 @@ typedef struct {
 } face_array;
 
 typedef struct {
-    sprite3D *values;
+    directional_light *values;
     u32 size, used;
 
-} sprite3D_array;
-
-// LIGHT ARRAYS
-
-typedef struct {
-    dir_light *values;
-    u32 size, used;
-
-} dir_light_array;
-
-typedef struct {
-    omni_light *values;
-    u32 size, used;
-
-} omni_light_array;
+} directional_light_array;
 
 // Define scene/window/viewport properties.
 struct {
@@ -124,18 +96,21 @@ struct {
     SDL_Texture *canvas;
     u32 surface[CANVAS_WIDTH * CANVAS_HEIGHT];
     f32 depth_buffer[CANVAS_WIDTH * CANVAS_HEIGHT];
+    u8 mode;
+    bool backface_culling;
+    bool depth_buffering;
 
     // Viewport properties.
     f32 viewport_width, viewport_height, viewport_distance;
-    vector3D viewport_position, viewport_rotation;
+    vector3D viewport_position, viewport_rotation, ambient_light;
 
     // Scene buffers.
     vertice_array vertex_buffer;
     face_array geo_buffer;
-    sprite3D_array sprite3D_buffer;
-    dir_light_array dir_light_buffer;
-    omni_light_array omni_light_buffer;
-    
+    vertice_array projected_buffer;
+    directional_light_array directional_light_buffer;
+
+      
 } state;
 
 #endif
