@@ -14,7 +14,7 @@ All code provided by me. OBJ's imported from blender.
 
 TO-DO: Add code comments, and texture support.
 
-KNOWN BUGS: Mac randomly kills the application.
+KNOWN BUGS: I have a memory leak somewhere.
 
 Compile command(with clang):    clang -o app src/main.c src/vector.c src/renderer.c src/model.c -lSDL2
                                 ./app
