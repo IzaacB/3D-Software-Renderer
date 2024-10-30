@@ -98,8 +98,8 @@ int main(){
             state.viewport_position.y += 5 * delta;
         }
 
-        if (keystate[SDL_SCANCODE_LSHIFT]){
-            //state.viewport_position.y -= 5 * delta;
+        if (keystate[SDL_SCANCODE_C]){
+            state.viewport_position.y -= 5 * delta;
         }
 
         if (keystate[SDL_SCANCODE_UP]){

@@ -1,4 +1,4 @@
-Controls: WASD to move, LSHIFT to go up, LCTRL to go down.
+Controls: WASD to move, SPACE to go up, C to go down.
 Key press:
     0, vertice mode.
     1, wireframe mode.
