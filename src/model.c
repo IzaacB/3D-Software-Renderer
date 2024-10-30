@@ -22,12 +22,14 @@ void clear_vertice_array(vertice_array *array) { //Clear the contents in a verti
     array->used = 0;
 }
 
-void copy_vertice_array(vertice_array *dest, vertice_array *src){
+void copy_vertice_array(vertice_array *dest, vertice_array *src) {
+    if (dest->values != NULL) {
+        free(dest->values);
+    }
     dest->size = src->size;
     dest->used = src->used;
-
     dest->values = (vertex *)malloc(dest->size * sizeof(vertex));
-    for (u32 i = 0; i < src->used; i++){
+    for (u32 i = 0; i < src->used; i++) {
         dest->values[i] = src->values[i];
     }
 }
@@ -59,12 +61,14 @@ void clear_face_array(face_array *array) { //Clear the contents in a vertice arr
     array->used = 0;
 }
 
-void copy_face_array(face_array *dest, face_array *src){
+void copy_face_array(face_array *dest, face_array *src) {
+    if (dest->values != NULL) {
+        free(dest->values);
+    }
     dest->size = src->size;
     dest->used = src->used;
-
     dest->values = (face *)malloc(dest->size * sizeof(face));
-    for (u32 i = 0; i < src->used; i++){
+    for (u32 i = 0; i < src->used; i++) {
         dest->values[i] = src->values[i];
     }
 }
@@ -137,9 +141,7 @@ void add_obj_to_scene(char *path, vector3D transform, vector3D rotation, vector3
             face face = {v0 - 1 + offset, v1 - 1 + offset, v2 - 1 + offset, color, flat};
             insert_face(&state.geo_buffer, face);
         }
-
     }
-
     fclose(file);
 }
 

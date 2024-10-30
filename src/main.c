@@ -24,15 +24,15 @@ int main(){
     f32 input_timer = 0;
 
     vector3D obj_transform = {0, 0, 0};
-    vector3D obj_rotation = {0, 0, 0};
+    vector3D obj_rotation = {-.5, -.75, 0};
     vector3D obj_scale = {10, 10, 10};
 
     vector3D obj2_transform = {0, 0, 0};
-    vector3D obj2_rotation = {0, 0, 0};
+    vector3D obj2_rotation = {.1, .5, 0};
     vector3D obj2_scale = {5, 5, 5};
 
     vector3D obj3_transform = {0, 0, 0};
-    vector3D obj3_rotation = {0, 0, 0};
+    vector3D obj3_rotation = {.5, .75, 0};
     vector3D obj3_scale = {10, 10, 10};
 
     directional_light light = {{1, 1, 0}, {1, 1, 1}};
@@ -64,8 +64,10 @@ int main(){
                     break;
             }
         }
+
         // Initialize scene buffers
         initialize_vertice_array(&state.vertex_buffer, 1);
+        initialize_vertice_array(&state.projected_buffer, 1);
         initialize_face_array(&state.geo_buffer, 1);
         initialize_directional_light_array(&state.directional_light_buffer, 1);
 
@@ -92,12 +94,12 @@ int main(){
             state.viewport_position.z -= 5 * sin(state.viewport_rotation.y) * delta;
         }
 
-        if (keystate[SDL_SCANCODE_LSHIFT]){
+        if (keystate[SDL_SCANCODE_SPACE]){
             state.viewport_position.y += 5 * delta;
         }
 
-        if (keystate[SDL_SCANCODE_LCTRL]){
-            state.viewport_position.y -= 5 * delta;
+        if (keystate[SDL_SCANCODE_LSHIFT]){
+            //state.viewport_position.y -= 5 * delta;
         }
 
         if (keystate[SDL_SCANCODE_UP]){
@@ -115,6 +117,7 @@ int main(){
         if (keystate[SDL_SCANCODE_RIGHT]){
             state.viewport_rotation.y -= 2 * delta;
         }
+        
 
         if (keystate[SDL_SCANCODE_0]){
             state.mode = 0;
@@ -177,6 +180,7 @@ int main(){
         update_screen();
 
         clear_vertice_array(&state.vertex_buffer);
+        clear_vertice_array(&state.projected_buffer);
         clear_face_array(&state.geo_buffer);
         clear_directional_light_array(&state.directional_light_buffer);
 

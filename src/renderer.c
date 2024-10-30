@@ -128,7 +128,7 @@ static void initialize_vertex_normals(){
 
 static void initialize_vertex_lighting(){
     for (u32 i = 0; i < state.vertex_buffer.used; i++){
-        state.vertex_buffer.values[i].light_intensity= state.ambient_light;
+        state.vertex_buffer.values[i].light_intensity = state.ambient_light;
     }
 }
 
@@ -192,6 +192,7 @@ static void cull_backfaces(){
         }
     }
     copy_face_array(&state.geo_buffer, &culled_faces);
+    clear_face_array(&culled_faces);
 }
 
 static void light_scene_faces(){
@@ -461,7 +462,7 @@ static void clip_scene(){
 
 static void project_vertices(){
     // Initialize global buffer.
-    initialize_vertice_array(&state.projected_buffer, state.vertex_buffer.used);
+    //initialize_vertice_array(&state.projected_buffer, state.vertex_buffer.used);
 
     for (int i = 0; i < state.vertex_buffer.used; i++) {
         // Project each vertice's position, and send to buffer.
@@ -932,6 +933,10 @@ static void draw_filled(){
 
 void render_scene(){
     assign_face_normals();
+
+    if (state.backface_culling){
+        cull_backfaces();
+    }
     if (state.mode == 3){
         light_scene_faces();
     }
@@ -942,10 +947,6 @@ void render_scene(){
 
     if (state.mode == 5){
         assign_vertex_normals();
-    }
-
-    if (state.backface_culling){
-        cull_backfaces();
     }
 
     clip_scene();
@@ -960,5 +961,5 @@ void render_scene(){
     }else if(state.mode == 2 || state.mode == 3 || state.mode == 4 || state.mode == 5){
         draw_filled();
     }
-    clear_vertice_array(&state.projected_buffer);
+    //clear_vertice_array(&state.projected_buffer);
 }

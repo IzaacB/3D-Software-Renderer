@@ -8,7 +8,7 @@ extern void initialize_vertice_array(vertice_array *array, u32 initial_size);
 
 extern void insert_vertice(vertice_array *array, vertex vertice);
 
-extern void clear_vertice_array(vertice_array * array);
+extern void clear_vertice_array(vertice_array *array);
 
 extern void copy_vertice_array(vertice_array *dest, vertice_array *src);
 

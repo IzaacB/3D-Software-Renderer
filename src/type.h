@@ -6,8 +6,8 @@
 #include <stdbool.h>
 #include <math.h>
 
-#define CANVAS_WIDTH 256//1280//320
-#define CANVAS_HEIGHT 224 //720//180
+#define CANVAS_WIDTH 320//1280//320
+#define CANVAS_HEIGHT 180 //720//180
 #define TARGET_FPS 60
 
 typedef float f32;
